@@ -1,13 +1,13 @@
 [app]
 
 # (str) Title of your application
-title = Plano Híbrido 8 Semanas
+title = Plano Hibrido
 
 # (str) Package name
 package.name = planohibrido
 
 # (str) Package domain (needed for android/ios packaging)
-package.domain = com.planohibrido.app
+package.domain = org.planohibrido
 
 # (str) Source code where the main.py live
 source.dir = .
@@ -20,7 +20,7 @@ version = 1.0
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3,kivy,kivymd
+requirements = python3,kivy==2.1.0
 
 # (str) Supported orientation (landscape, sensorLandscape, portrait, all)
 orientation = landscape
@@ -29,19 +29,19 @@ orientation = landscape
 fullscreen = 1
 
 # (list) Permissions
-android.permissions = WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE,INTERNET,ACCESS_NETWORK_STATE,ACCESS_WIFI_STATE
+android.permissions = INTERNET,WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE
 
 # (int) Target Android API, should be as high as possible.
-android.api = 34
+android.api = 31
 
 # (int) Minimum API your APK / AAB will support.
 android.minapi = 21
 
 # (str) Android NDK version to use
-android.ndk = 26b
+android.ndk = 23b
 
 # (str) Android SDK version to use
-android.sdk = 34
+android.sdk = 31
 
 # (bool) Use --private data storage (True) or --dir public storage (False)
 android.private_storage = True
@@ -53,24 +53,10 @@ android.logcat_filters = *:S python:D
 android.copy_libs = 1
 
 # (str) The Android arch to build for, choices: armeabi-v7a, arm64-v8a, x86, x86_64
-android.archs = arm64-v8a
+android.archs = arm64-v8a,armeabi-v7a
 
 # (bool) enables Android auto backup feature (Android API >=23)
 android.allow_backup = True
-
-# (str) XML file for Android backup rules
-# android.backup_rules =
-
-# (str) If you need to insert variables into your AndroidManifest.xml file,
-# you can do so with the manifestPlaceholders property.
-# This property takes a map of key-value pairs.
-# android.manifest_placeholders = [:]
-
-# (bool) Skip byte compile for .py files
-# android.no-byte-compile-python = False
-
-# (str) The format used to package the app for release mode (aab or apk).
-# android.release_artifact = aab
 
 [buildozer]
 

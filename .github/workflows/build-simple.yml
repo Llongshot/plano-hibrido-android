@@ -1,0 +1,74 @@
+name: Build APK Simple
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y openjdk-8-jdk unzip
+        python -m pip install --upgrade pip
+        pip install buildozer cython==0.29.33
+
+    - name: Setup Java 8
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '8'
+
+    - name: Build APK
+      run: |
+        yes | buildozer android debug || true
+        
+        # Try again if failed
+        if [ ! -f bin/*.apk ]; then
+          echo "First build failed, trying again..."
+          buildozer android clean
+          yes | buildozer android debug
+        fi
+
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-debug
+        path: bin/*.apk
+
+    - name: Create Release
+      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: v1.0.${{ github.run_number }}
+        name: Plano Híbrido v1.0.${{ github.run_number }}
+        body: |
+          🏋️ **Plano Híbrido 8 Semanas - Android APK**
+          
+          📱 **Como instalar:**
+          1. Baixe o APK
+          2. Ative "Fontes desconhecidas" no Android
+          3. Instale o APK
+          
+          ✨ **Funcionalidades:**
+          - Timer visual para exercícios
+          - Vídeos do YouTube integrados
+          - Progresso salvo localmente
+          - Interface Android TV
+          
+          🎯 **Compatível com Android 5.0+**
+        files: bin/*.apk
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

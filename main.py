@@ -11,22 +11,21 @@ from kivy.uix.textinput import TextInput
 from kivy.graphics import Color, Rectangle
 from kivy.animation import Animation
 from kivy.core.window import Window
-from kivy.utils import get_color_from_hex
 import json
 import os
 import webbrowser
 
-# Cores do tema
+# Cores do tema (valores RGB diretos)
 CORES = {
-    'primaria': get_color_from_hex('#2563EB'),
-    'secundaria': get_color_from_hex('#7C3AED'),
-    'sucesso': get_color_from_hex('#10B981'),
-    'aviso': get_color_from_hex('#F59E0B'),
-    'erro': get_color_from_hex('#EF4444'),
-    'fundo': get_color_from_hex('#1F2937'),
-    'fundo_claro': get_color_from_hex('#374151'),
-    'texto': get_color_from_hex('#F9FAFB'),
-    'texto_secundario': get_color_from_hex('#D1D5DB')
+    'primaria': (0.15, 0.64, 0.92, 1),      # Azul
+    'secundaria': (0.49, 0.23, 0.93, 1),    # Roxo
+    'sucesso': (0.06, 0.72, 0.51, 1),       # Verde
+    'aviso': (0.96, 0.62, 0.04, 1),         # Laranja
+    'erro': (0.94, 0.27, 0.27, 1),          # Vermelho
+    'fundo': (0.12, 0.16, 0.22, 1),         # Cinza escuro
+    'fundo_claro': (0.22, 0.25, 0.32, 1),   # Cinza médio
+    'texto': (0.98, 0.98, 0.99, 1),         # Branco
+    'texto_secundario': (0.82, 0.84, 0.86, 1) # Cinza claro
 }
 
 # Dados dos exercícios com vídeos
