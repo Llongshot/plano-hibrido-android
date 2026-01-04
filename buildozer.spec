@@ -19,29 +19,28 @@ source.include_exts = py,png,jpg,kv,atlas,json
 version = 1.0
 
 # (list) Application requirements
-# comma separated e.g. requirements = sqlite3,kivy
 requirements = python3,kivy==2.1.0
 
 # (str) Supported orientation (landscape, sensorLandscape, portrait, all)
-orientation = landscape
+orientation = portrait
 
 # (bool) Indicate if the application should be fullscreen or not
-fullscreen = 1
+fullscreen = 0
 
 # (list) Permissions
-android.permissions = INTERNET,WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE
+android.permissions = INTERNET
 
 # (int) Target Android API, should be as high as possible.
-android.api = 31
+android.api = 30
 
 # (int) Minimum API your APK / AAB will support.
 android.minapi = 21
 
 # (str) Android NDK version to use
-android.ndk = 23b
+android.ndk = 21b
 
 # (str) Android SDK version to use
-android.sdk = 31
+android.sdk = 30
 
 # (bool) Use --private data storage (True) or --dir public storage (False)
 android.private_storage = True
@@ -53,10 +52,22 @@ android.logcat_filters = *:S python:D
 android.copy_libs = 1
 
 # (str) The Android arch to build for, choices: armeabi-v7a, arm64-v8a, x86, x86_64
-android.archs = arm64-v8a,armeabi-v7a
+android.archs = arm64-v8a
 
 # (bool) enables Android auto backup feature (Android API >=23)
 android.allow_backup = True
+
+# (str) Bootstrap to use for android builds
+# p4a.bootstrap = sdl2
+
+# (str) python-for-android fork to use, defaults to upstream (kivy)
+# p4a.fork = kivy
+
+# (str) python-for-android branch to use, defaults to master
+# p4a.branch = master
+
+# (str) python-for-android git url, if not set, defaults to https://github.com/kivy/python-for-android
+# p4a.url =
 
 [buildozer]
 

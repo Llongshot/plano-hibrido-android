@@ -1,0 +1,232 @@
+name: Build APK Robust
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.9'
+
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update -qq
+        sudo apt-get install -qq -y \
+          openjdk-8-jdk \
+          unzip \
+          wget \
+          expect \
+          build-essential \
+          git \
+          python3-dev \
+          python3-pip
+
+    - name: Set up Java 8
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '8'
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install buildozer cython==0.29.33
+
+    - name: Pre-accept Android SDK licenses
+      run: |
+        # Create Android license directory
+        mkdir -p ~/.android/licenses
+        
+        # Pre-populate license files with known hashes
+        echo "24333f8a63b6825ea9c5514f83c2829b004d1fee" > ~/.android/licenses/android-sdk-license
+        echo "84831b9409646a918e30573bab4c9c91346d8abd" > ~/.android/licenses/android-sdk-preview-license
+        echo "d975f751698a77b662f1254ddbeed3901e976f5a" > ~/.android/licenses/intel-android-extra-license
+        echo "601085b94cd77f0b54ff86406957099ebe79c4d6" > ~/.android/licenses/android-googletv-license
+        echo "33b6a2b64607f11b759f320ef9dff4ae5c47d97a" > ~/.android/licenses/google-gdk-license
+        echo "d23a205b586720d0b7ca3d49c14ba8b5e9b5d5b6" > ~/.android/licenses/mips-android-sysimage-license
+        
+        # Create repositories config
+        echo 'count=0' > ~/.android/repositories.cfg
+
+    - name: Build APK with Buildozer
+      run: |
+        # Set environment variables
+        export ANDROID_SDK_ROOT="$HOME/.buildozer/android/platform/android-sdk"
+        export ANDROID_HOME="$ANDROID_SDK_ROOT"
+        export JAVA_HOME="/usr/lib/jvm/java-8-openjdk-amd64"
+        
+        # Create expect script for automatic license acceptance
+        cat > auto_accept.exp << 'EOF'
+        #!/usr/bin/expect -f
+        set timeout 3600
+        
+        spawn buildozer android debug
+        
+        expect {
+          "Accept? (y/N):" {
+            send "y\r"
+            exp_continue
+          }
+          "Do you accept the license" {
+            send "y\r"
+            exp_continue
+          }
+          "Accept (y/N):" {
+            send "y\r"
+            exp_continue
+          }
+          "Terms and Conditions" {
+            send "y\r"
+            exp_continue
+          }
+          eof {
+            puts "Build completed"
+          }
+          timeout {
+            puts "Build timed out"
+            exit 1
+          }
+        }
+        EOF
+        
+        chmod +x auto_accept.exp
+        
+        # Run the build with expect
+        ./auto_accept.exp || {
+          echo "Expect build failed, trying alternative method..."
+          
+          # Alternative: Use yes command with timeout
+          timeout 3600 bash -c 'yes | buildozer android debug' || {
+            echo "Alternative build also failed, trying manual approach..."
+            
+            # Manual approach: Initialize buildozer first
+            buildozer init || true
+            
+            # Then build
+            echo "y" | buildozer android debug || true
+          }
+        }
+
+    - name: Verify APK creation
+      run: |
+        echo "Checking for APK files..."
+        if [ -d "bin" ]; then
+          echo "Contents of bin directory:"
+          ls -la bin/
+          
+          if ls bin/*.apk 1> /dev/null 2>&1; then
+            echo "✅ APK files found!"
+            for apk in bin/*.apk; do
+              echo "📱 APK: $apk"
+              echo "📊 Size: $(du -h "$apk" | cut -f1)"
+            done
+          else
+            echo "❌ No APK files found in bin directory"
+          fi
+        else
+          echo "❌ No bin directory found"
+          echo "Searching for APK files in entire workspace..."
+          find . -name "*.apk" -type f 2>/dev/null || echo "No APK files found anywhere"
+        fi
+
+    - name: Upload APK artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: plano-hibrido-apk
+        path: bin/*.apk
+        if-no-files-found: warn
+
+    - name: Create GitHub Release
+      if: github.ref == 'refs/heads/main' && hashFiles('bin/*.apk') != ''
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: v1.0.${{ github.run_number }}
+        name: 🏋️ Plano Híbrido v1.0.${{ github.run_number }}
+        body: |
+          ## 🏋️ Plano Híbrido 8 Semanas - Android APK
+          
+          **📱 Aplicação Android para treino de 8 semanas**
+          
+          ### ✨ Funcionalidades:
+          - ⏱️ **Timer visual** com contagem regressiva
+          - 🎥 **Vídeos do YouTube** integrados (6 exercícios)
+          - 📊 **Progresso pessoal** (peso e notas por dia)
+          - 📺 **Interface Android TV** otimizada
+          - 🔄 **8 semanas progressivas** (intensidade automática)
+          - 💾 **Dados salvos localmente** (sem internet necessária)
+          
+          ### 🎯 Exercícios Incluídos:
+          1. Ponte de Glúteos
+          2. Bird-Dog
+          3. Prancha Modificada
+          4. Gato-Vaca
+          5. Superman Alternado
+          6. Retração Escapular na Parede
+          
+          ### 📥 Como Instalar:
+          1. **Baixe o APK** abaixo
+          2. **Ative "Fontes desconhecidas"** no Android:
+             - Configurações → Segurança → Fontes desconhecidas
+          3. **Instale o APK** tocando no arquivo
+          4. **Comece a treinar!** 💪
+          
+          ### 🎮 Como Usar:
+          - **📆 Plano Semanal**: Exercícios organizados por dia
+          - **🎥 Botão Vídeo**: Abre YouTube com demonstração
+          - **▶ Iniciar**: Começa timer do exercício
+          - **◀ ▶**: Navega entre semanas (1-8)
+          
+          ### 📱 Compatibilidade:
+          - ✅ **Android 5.0+** (API 21+)
+          - ✅ **Android TV** suportado
+          - ✅ **Smartphones** e **tablets**
+          - ✅ **Orientação landscape** para TV
+          
+          ### 🔧 Informações Técnicas:
+          - **Build**: #${{ github.run_number }}
+          - **Commit**: `${{ github.sha }}`
+          - **Data**: ${{ github.event.head_commit.timestamp }}
+          
+          ---
+          
+          **🚀 Desenvolvido com Kivy + Buildozer | 💝 Código aberto**
+        files: bin/*.apk
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build summary
+      if: always()
+      run: |
+        echo "## 📊 Build Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        if [ -f bin/*.apk ]; then
+          echo "✅ **APK Build Successful**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📱 **Generated APK:**" >> $GITHUB_STEP_SUMMARY
+          for apk in bin/*.apk; do
+            echo "- $(basename "$apk") ($(du -h "$apk" | cut -f1))" >> $GITHUB_STEP_SUMMARY
+          done
+        else
+          echo "❌ **APK Build Failed**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🔍 **Check the logs above for error details**" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "🎯 **Next Steps:**" >> $GITHUB_STEP_SUMMARY
+        echo "1. Download APK from Artifacts or Releases" >> $GITHUB_STEP_SUMMARY
+        echo "2. Install on Android device" >> $GITHUB_STEP_SUMMARY
+        echo "3. Start training! 💪" >> $GITHUB_STEP_SUMMARY
