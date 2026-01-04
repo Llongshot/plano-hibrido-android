@@ -49,6 +49,8 @@ jobs:
         
         # Pre-populate license files with known hashes
         echo "24333f8a63b6825ea9c5514f83c2829b004d1fee" > ~/.android/licenses/android-sdk-license
+        echo "8933bad161af4178b1185d1a37fbf41ea5269c55" >> ~/.android/licenses/android-sdk-license
+        echo "d56f5187479451eabf01fb78af6dfcb131a6481e" >> ~/.android/licenses/android-sdk-license
         echo "84831b9409646a918e30573bab4c9c91346d8abd" > ~/.android/licenses/android-sdk-preview-license
         echo "d975f751698a77b662f1254ddbeed3901e976f5a" > ~/.android/licenses/intel-android-extra-license
         echo "601085b94cd77f0b54ff86406957099ebe79c4d6" > ~/.android/licenses/android-googletv-license
@@ -64,58 +66,14 @@ jobs:
         export ANDROID_SDK_ROOT="$HOME/.buildozer/android/platform/android-sdk"
         export ANDROID_HOME="$ANDROID_SDK_ROOT"
         export JAVA_HOME="/usr/lib/jvm/java-8-openjdk-amd64"
+        export PATH="$PATH:$ANDROID_SDK_ROOT/tools/bin:$ANDROID_SDK_ROOT/platform-tools"
         
-        # Create expect script for automatic license acceptance
-        cat > auto_accept.exp << 'EOF'
-        #!/usr/bin/expect -f
-        set timeout 3600
+        # Initialize buildozer
+        buildozer init || true
         
-        spawn buildozer android debug
-        
-        expect {
-          "Accept? (y/N):" {
-            send "y\r"
-            exp_continue
-          }
-          "Do you accept the license" {
-            send "y\r"
-            exp_continue
-          }
-          "Accept (y/N):" {
-            send "y\r"
-            exp_continue
-          }
-          "Terms and Conditions" {
-            send "y\r"
-            exp_continue
-          }
-          eof {
-            puts "Build completed"
-          }
-          timeout {
-            puts "Build timed out"
-            exit 1
-          }
-        }
-        EOF
-        
-        chmod +x auto_accept.exp
-        
-        # Run the build with expect
-        ./auto_accept.exp || {
-          echo "Expect build failed, trying alternative method..."
-          
-          # Alternative: Use yes command with timeout
-          timeout 3600 bash -c 'yes | buildozer android debug' || {
-            echo "Alternative build also failed, trying manual approach..."
-            
-            # Manual approach: Initialize buildozer first
-            buildozer init || true
-            
-            # Then build
-            echo "y" | buildozer android debug || true
-          }
-        }
+        # Run build with yes to accept any remaining licenses
+        # Using a loop to persist 'y' input
+        yes | buildozer android debug
 
     - name: Verify APK creation
       run: |
