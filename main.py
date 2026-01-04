@@ -14,6 +14,12 @@ from kivy.core.window import Window
 import json
 import os
 import webbrowser
+from kivy.utils import platform
+from android_utils import AndroidWebView
+
+if platform == 'android':
+    android_webview = AndroidWebView()
+
 
 # Cores do tema (valores RGB diretos)
 CORES = {
@@ -359,57 +365,60 @@ class SemanaScreen(Screen):
             self.exercicios_layout.add_widget(dia_container)
     
     def abrir_video(self, url):
-        content = BoxLayout(orientation='vertical', spacing=20, padding=30)
-        
-        title_label = Label(
-            text='🎥 Vídeo do Exercício',
-            font_size='18sp',
-            color=CORES['texto'],
-            bold=True,
-            size_hint_y=0.2
-        )
-        
-        url_input = TextInput(
-            text=url,
-            multiline=False,
-            readonly=True,
-            size_hint_y=0.3,
-            font_size='12sp'
-        )
-        
-        buttons_layout = BoxLayout(orientation='vertical', spacing=10, size_hint_y=0.5)
-        
-        btn_abrir = AnimatedButton(
-            text='🌐 ABRIR NAVEGADOR',
-            size_hint_y=None,
-            height='40dp',
-            cor=CORES['primaria']
-        )
-        btn_abrir.bind(on_press=lambda x: [webbrowser.open(url), popup.dismiss()])
-        
-        btn_fechar = AnimatedButton(
-            text='❌ FECHAR',
-            size_hint_y=None,
-            height='40dp',
-            cor=CORES['erro']
-        )
-        
-        buttons_layout.add_widget(btn_abrir)
-        buttons_layout.add_widget(btn_fechar)
-        
-        content.add_widget(title_label)
-        content.add_widget(url_input)
-        content.add_widget(buttons_layout)
-        
-        popup = Popup(
-            title='',
-            content=content,
-            size_hint=(0.9, 0.6),
-            separator_height=0
-        )
-        
-        btn_fechar.bind(on_press=popup.dismiss)
-        popup.open()
+        if platform == 'android':
+            android_webview.open_url(url)
+        else:
+            content = BoxLayout(orientation='vertical', spacing=20, padding=30)
+            
+            title_label = Label(
+                text='🎥 Vídeo do Exercício',
+                font_size='18sp',
+                color=CORES['texto'],
+                bold=True,
+                size_hint_y=0.2
+            )
+            
+            url_input = TextInput(
+                text=url,
+                multiline=False,
+                readonly=True,
+                size_hint_y=0.3,
+                font_size='12sp'
+            )
+            
+            buttons_layout = BoxLayout(orientation='vertical', spacing=10, size_hint_y=0.5)
+            
+            btn_abrir = AnimatedButton(
+                text='🌐 ABRIR NAVEGADOR',
+                size_hint_y=None,
+                height='40dp',
+                cor=CORES['primaria']
+            )
+            btn_abrir.bind(on_press=lambda x: [webbrowser.open(url), popup.dismiss()])
+            
+            btn_fechar = AnimatedButton(
+                text='❌ FECHAR',
+                size_hint_y=None,
+                height='40dp',
+                cor=CORES['erro']
+            )
+            
+            buttons_layout.add_widget(btn_abrir)
+            buttons_layout.add_widget(btn_fechar)
+            
+            content.add_widget(title_label)
+            content.add_widget(url_input)
+            content.add_widget(buttons_layout)
+            
+            popup = Popup(
+                title='',
+                content=content,
+                size_hint=(0.9, 0.6),
+                separator_height=0
+            )
+            
+            btn_fechar.bind(on_press=popup.dismiss)
+            popup.open()
     
     def diminuir_semana(self, instance):
         if self.semana_atual > 1:
@@ -619,49 +628,52 @@ class ExerciciosScreen(Screen):
         self.add_widget(main_layout)
     
     def abrir_video(self, url):
-        content = BoxLayout(orientation='vertical', spacing=15, padding=20)
-        
-        info_label = Label(
-            text='Link do vídeo:',
-            font_size='16sp',
-            color=CORES['texto'],
-            size_hint_y=0.2
-        )
-        
-        url_input = TextInput(
-            text=url,
-            multiline=False,
-            readonly=True,
-            size_hint_y=0.4,
-            font_size='12sp'
-        )
-        
-        btn_abrir = AnimatedButton(
-            text='🌐 ABRIR NO NAVEGADOR',
-            size_hint_y=0.2,
-            cor=CORES['primaria']
-        )
-        btn_abrir.bind(on_press=lambda x: [webbrowser.open(url), popup.dismiss()])
-        
-        btn_fechar = AnimatedButton(
-            text='Fechar',
-            size_hint_y=0.2,
-            cor=CORES['erro']
-        )
-        
-        content.add_widget(info_label)
-        content.add_widget(url_input)
-        content.add_widget(btn_abrir)
-        content.add_widget(btn_fechar)
-        
-        popup = Popup(
-            title='Vídeo do Exercício',
-            content=content,
-            size_hint=(0.9, 0.5)
-        )
-        
-        btn_fechar.bind(on_press=popup.dismiss)
-        popup.open()
+        if platform == 'android':
+            android_webview.open_url(url)
+        else:
+            content = BoxLayout(orientation='vertical', spacing=15, padding=20)
+            
+            info_label = Label(
+                text='Link do vídeo:',
+                font_size='16sp',
+                color=CORES['texto'],
+                size_hint_y=0.2
+            )
+            
+            url_input = TextInput(
+                text=url,
+                multiline=False,
+                readonly=True,
+                size_hint_y=0.4,
+                font_size='12sp'
+            )
+            
+            btn_abrir = AnimatedButton(
+                text='🌐 ABRIR NO NAVEGADOR',
+                size_hint_y=0.2,
+                cor=CORES['primaria']
+            )
+            btn_abrir.bind(on_press=lambda x: [webbrowser.open(url), popup.dismiss()])
+            
+            btn_fechar = AnimatedButton(
+                text='Fechar',
+                size_hint_y=0.2,
+                cor=CORES['erro']
+            )
+            
+            content.add_widget(info_label)
+            content.add_widget(url_input)
+            content.add_widget(btn_abrir)
+            content.add_widget(btn_fechar)
+            
+            popup = Popup(
+                title='Vídeo do Exercício',
+                content=content,
+                size_hint=(0.9, 0.5)
+            )
+            
+            btn_fechar.bind(on_press=popup.dismiss)
+            popup.open()
     
     def voltar(self, instance):
         self.manager.transition = SlideTransition(direction='right')
