@@ -11,6 +11,7 @@ from kivy.uix.textinput import TextInput
 from kivy.graphics import Color, Rectangle
 from kivy.animation import Animation
 from kivy.core.window import Window
+from kivy.uix.behaviors.focus import FocusBehavior
 import json
 import os
 import webbrowser
@@ -86,16 +87,24 @@ EXERCICIOS_DATA = [
     }
 ]
 
-class AnimatedButton(Button):
+class AnimatedButton(FocusBehavior, Button):
     def __init__(self, cor=None, **kwargs):
         super().__init__(**kwargs)
         self.background_color = cor or CORES['primaria']
+        self.original_color = self.background_color
         self.color = CORES['texto']
         self.font_size = '16sp'
         self.bold = True
         
         self.bind(on_press=self._on_press)
         self.bind(on_release=self._on_release)
+        self.bind(focus=self._on_focus)
+
+    def _on_focus(self, instance, value):
+        if value:
+            self.background_color = CORES['aviso']
+        else:
+            self.background_color = self.original_color
     
     def _on_press(self, instance):
         anim = Animation(size=(self.size[0] * 0.95, self.size[1] * 0.95), duration=0.1)
