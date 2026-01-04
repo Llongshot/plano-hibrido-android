@@ -32,16 +32,16 @@ fullscreen = 1
 android.permissions = WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE,INTERNET,ACCESS_NETWORK_STATE,ACCESS_WIFI_STATE
 
 # (int) Target Android API, should be as high as possible.
-android.api = 33
+android.api = 34
 
 # (int) Minimum API your APK / AAB will support.
 android.minapi = 21
 
 # (str) Android NDK version to use
-android.ndk = 25b
+android.ndk = 26b
 
 # (str) Android SDK version to use
-android.sdk = 33
+android.sdk = 34
 
 # (bool) Use --private data storage (True) or --dir public storage (False)
 android.private_storage = True
